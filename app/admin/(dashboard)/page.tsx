@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { EventsPerformanceChart } from "@/components/charts/events-performance-charts";
 import { GuestBreakdownChart } from "@/components/charts/guest-breakdown-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Banknote, CalendarCheck } from "lucide-react";

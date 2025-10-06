@@ -13,7 +13,7 @@ import {
 
 interface ChartData {
   name: string;
-  [key: string]: any;
+  [key: string]: string | number | undefined;
 }
 
 interface StackedPerformanceChartProps {

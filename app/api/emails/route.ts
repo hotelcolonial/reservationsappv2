@@ -1,5 +1,6 @@
 import PreReservationClientEmail from "@/app/emails/PreReservationClientEmail";
 import { Resend } from "resend";
+import { Reservation } from "@/lib/types";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
         "mkt@hotelcolonialfoz.com.br", // Email interno
         email, // Email del cliente
       ],
-      subject: `Pré-reserva confirmada: ${bookedEvents.map((e: any) => e.name).join(", ")}`,
+      subject: `Pré-reserva confirmada: ${bookedEvents.map((e: Reservation) => e.name).join(", ")}`,
 
       // 3. Pasamos TODAS las props al componente de React
       react: await PreReservationClientEmail({

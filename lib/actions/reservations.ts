@@ -2,7 +2,6 @@
 "use server";
 
 import { createClient } from "../supabase/server";
-import { Reservation } from "@/lib/types";
 import { revalidatePath } from "next/cache"; // <- Importa revalidatePath
 
 // ... (tu función getReservationsByEventSlug existente) ...

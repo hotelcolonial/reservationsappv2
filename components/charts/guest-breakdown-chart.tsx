@@ -11,11 +11,9 @@ import {
 } from "recharts";
 import {
   ChartContainer,
-  ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Label } from "../ui/label";
 
 interface ChartData {
   adults: number;

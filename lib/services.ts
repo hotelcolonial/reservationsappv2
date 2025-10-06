@@ -1,7 +1,7 @@
 // lib/services/reservation.service.ts
 
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Reservation, EventType } from "@/lib/types"; // Importa tus modelos
+import { Reservation } from "@/lib/types"; // Importa tus modelos
 
 export const reservationService = {
   async getReservationsByEventSlug(

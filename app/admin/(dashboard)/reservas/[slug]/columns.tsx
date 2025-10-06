@@ -2,10 +2,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { CheckCircle2 } from "lucide-react"; // Un icono para el botón
 import { Reservation } from "@/lib/types"; // Importa el tipo que definimos
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { EditableLocatorCell } from "./editable-locator-cell";
 import { VerificationCell } from "./verification-cell";
 

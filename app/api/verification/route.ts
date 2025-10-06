@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: "Hotel Colonial Iguaçu <reservas@menucolonial.com.br>",
       to: [
         "mkt@hotelcolonialfoz.com.br", // Email interno
