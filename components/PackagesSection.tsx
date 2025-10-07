@@ -39,15 +39,15 @@ export default function PackagesSection() {
 
               {/* Subtítulo */}
               <h4 className="text-xl font-serif text-white">
-                Experiência Completa
+                Momentos de Paz e Conforto
               </h4>
 
               {/* Descripción */}
               <p className="font-radley text-amber-100/90 leading-relaxed">
-                Desfrute de uma atmosfera mágica com decoração festiva, músicos
-                ao vivo e um menu tradicional de Natal preparado com
-                ingredientes premium. Uma experiência inesquecível para toda a
-                família.
+                Aproveite o Natal em um ambiente tranquilo e acolhedor, com uma
+                refeição especial preparada pela nossa equipe. Uma oportunidade
+                para relaxar e celebrar em família, com todo o conforto do Hotel
+                Colonial Iguaçu.
               </p>
 
               {/* Etiquetas inferiores */}
@@ -77,15 +77,14 @@ export default function PackagesSection() {
 
               {/* Subtítulo */}
               <h4 className="text-xl font-serif text-[#0a3a2a]">
-                Ano Novo Especial
+                Virada com Tranquilidade
               </h4>
 
               {/* Descripción */}
               <p className="font-radley text-[#0a3a2a]/90 leading-relaxed">
-                Receba o Ano Novo com elegância em nosso evento exclusivo.
-                Jantar de gala, champagne à meia-noite e vista privilegiada para
-                os fogos de artifício. Uma celebração sofisticada para começar
-                2025 com estilo.
+                Despeça-se de 2025 em um clima sereno e familiar. Nosso jantar
+                especial de Réveillon foi pensado para quem deseja receber o
+                novo ano com conforto, boa comida e uma estadia agradável.
               </p>
 
               {/* Etiquetas inferiores */}
@@ -109,6 +108,12 @@ export default function PackagesSection() {
 
           <div>
             <Button
+              onClick={() => {
+                const section = document.getElementById("reservation-form");
+                if (section) {
+                  section.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
               variant="ghost"
               className="w-full md:w-auto md:bg-transparent border-[1px] border-amber-200 text-amber-200 hover:text-green-700 hover:bg-amber-200 italic font-light cursor-pointer"
             >

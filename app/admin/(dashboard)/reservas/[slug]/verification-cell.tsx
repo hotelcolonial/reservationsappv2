@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Reservation } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { verifyReservation } from "@/lib/actions/reservations";
 import { toast } from "sonner";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 
 interface VerificationCellProps {
   reservation: Reservation;
@@ -28,8 +28,11 @@ export function VerificationCell({
   eventSlug,
 }: VerificationCellProps) {
   const [isPending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
 
   const handleConfirmVerification = () => {
+    // 3. Cierra el modal inmediatamente y luego inicia la acción del servidor
+    setOpen(false);
     startTransition(async () => {
       const result = await verifyReservation(reservation.id, eventSlug);
 
@@ -41,6 +44,15 @@ export function VerificationCell({
     });
   };
 
+  if (isPending) {
+    return (
+      <Button size="sm" disabled>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Verificando...
+      </Button>
+    );
+  }
+
   // 1. Si la reserva ya está verificada, mostramos el estado final
   if (reservation.is_verified) {
     return (
@@ -51,7 +63,6 @@ export function VerificationCell({
     );
   }
 
-  // 2. Si no está verificada, mostramos el botón que abre el modal
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -74,10 +85,18 @@ export function VerificationCell({
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirmVerification}
-            disabled={isPending}
+            disabled={isPending} // Es importante mantener esto para evitar dobles clics
             className="bg-green-600 hover:bg-green-700 cursor-pointer"
           >
-            {isPending ? "Verificando..." : "Sim, confirmar verificação"}
+            {/* --- 2. Lógica para mostrar el spinner --- */}
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Verificando...
+              </>
+            ) : (
+              "Sim, confirmar verificação"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

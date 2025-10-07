@@ -24,7 +24,8 @@ export async function POST(request: Request) {
     await resend.emails.send({
       from: "Hotel Colonial Iguaçu <reservas@menucolonial.com.br>",
       to: [
-        "mkt@hotelcolonialfoz.com.br", // Email interno
+        "mkt@hotelcolonialfoz.com.br",
+        "reservas@hotelcolonialfoz.com.br", // Email interno
         email, // Email del cliente
       ],
       subject: `Pré-reserva confirmada: ${bookedEvents.map((e: Reservation) => e.name).join(", ")}`,

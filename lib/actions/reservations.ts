@@ -65,7 +65,7 @@ export async function verifyReservation(
     // 4. Llama a tu API Route para enviar el email.
     // Usamos la URL absoluta que debe estar en tus variables de entorno.
     const emailApiUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/verification`;
-    console.log("Intentando llamar a la API de email en:", emailApiUrl);
+
     try {
       const response = await fetch(emailApiUrl, {
         method: "POST",

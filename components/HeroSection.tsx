@@ -50,6 +50,12 @@ export default function HeroSection() {
             grande estilo.
           </p>
           <Button
+            onClick={() => {
+              const section = document.getElementById("reservation-form");
+              if (section) {
+                section.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
             variant="ghost"
             className="w-full md:w-auto md:bg-transparent border-[1px] border-amber-200 text-amber-200 hover:text-green-700 hover:bg-[#0a3a2a]/70 italic font-light cursor-pointer"
           >

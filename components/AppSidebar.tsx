@@ -11,6 +11,9 @@ import {
   CalendarDays,
   GlassWater,
   ChevronDown,
+  Bell, // <-- Nuevo ícono
+  Send, // <-- Nuevo ícono
+  Link2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -97,6 +100,22 @@ const menuGroups = [
         title: "Jantar de Ano Novo",
         href: "/admin/reservas/jantar-ano-novo",
         icon: GlassWater,
+      },
+    ],
+  },
+  {
+    label: "Lembretes", // Título de la nueva sección: "Recordatorios"
+    icon: Bell, // Ícono de campana para la sección
+    subItems: [
+      {
+        title: "Enviar Link", // Nuevo título
+        href: "/admin/enviar-link", // Nueva ruta
+        icon: Link2, // Nuevo ícono
+      },
+      {
+        title: "Enviar Lembrete", // Título del sub-ítem: "Enviar Recordatorios"
+        href: "/admin/lembretes", // Nueva ruta para la página de envío
+        icon: Send, // Ícono de enviar
       },
     ],
   },

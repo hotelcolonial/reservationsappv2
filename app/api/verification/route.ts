@@ -7,6 +7,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
     const { reservation, eventName } = body as {
       reservation: Reservation;
       eventName: string;
@@ -23,7 +24,8 @@ export async function POST(request: Request) {
       from: "Hotel Colonial Iguaçu <reservas@menucolonial.com.br>",
       to: [
         "mkt@hotelcolonialfoz.com.br", // Email interno
-        reservation.email, // Email del cliente
+        reservation.email,
+        "reservas@hotelcolonialfoz.com.br", // Email del cliente
       ],
       subject: `Sua reserva para ${eventName} está confirmada!`,
       react: await VerificationEmail({

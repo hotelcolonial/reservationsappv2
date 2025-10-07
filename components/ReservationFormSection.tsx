@@ -225,7 +225,10 @@ export default function ReservationFormSection() {
   };
 
   return (
-    <section className="relative py-24 px-6 sm:px-10 bg-white">
+    <section
+      id="reservation-form"
+      className="relative py-24 px-6 sm:px-10 bg-white"
+    >
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12 space-y-4">
           <div className="space-y-2">
@@ -488,7 +491,7 @@ export default function ReservationFormSection() {
             <DialogFooter className="flex justify-center pt-2">
               <Button
                 variant="ghost"
-                className="bg-transparent border-[1px] border-[#0a3a2a] text-[#0a3a2a] hover:text-amber-200 hover:bg-[#0a3a2a] italic font-light px-8"
+                className="bg-transparent cursor-pointer border-[1px] border-[#0a3a2a] text-[#0a3a2a] hover:text-amber-200 hover:bg-[#0a3a2a] italic font-light px-8"
                 onClick={() => {
                   setModalOpen(false);
                   resetForm();
