@@ -1,17 +1,8 @@
 // app/admin/reservas/[slug]/page.tsx
 
-import {
-  Users,
-  XCircle,
-  CheckCircle2,
-  Banknote,
-  Printer,
-  Baby,
-  CalendarCheck,
-} from "lucide-react";
+import { Users, XCircle, CheckCircle2, Banknote, Baby } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server"; // 1. Importa el
 import { reservationService } from "@/lib/services"; // 2. Importa tu
 import { ReservationsTable } from "./reservations-table";

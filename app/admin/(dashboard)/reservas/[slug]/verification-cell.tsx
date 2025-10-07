@@ -28,7 +28,7 @@ export function VerificationCell({
   eventSlug,
 }: VerificationCellProps) {
   const [isPending, startTransition] = useTransition();
-  const [open, setOpen] = useState(false);
+  const [, setOpen] = useState(false);
 
   const handleConfirmVerification = () => {
     // 3. Cierra el modal inmediatamente y luego inicia la acción del servidor

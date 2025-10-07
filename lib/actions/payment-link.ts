@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import PaymentLinkEmail from "@/app/emails/PaymentLinkEmail";
 import { UnverifiedReservation } from "@/app/emails/ReminderEmail";
+import { PostgrestError } from "@supabase/supabase-js";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -24,7 +25,7 @@ export async function sendPaymentLinkEmail(email: string, paymentLink: string) {
     .eq("email", email)
     .eq("is_verified", false)) as {
     data: UnverifiedReservation[] | null;
-    error: any;
+    error: PostgrestError | null;
   };
 
   if (dbError) {

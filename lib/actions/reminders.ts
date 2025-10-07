@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import ReminderEmail from "@/app/emails/ReminderEmail";
 import type { UnverifiedReservation } from "@/app/emails/ReminderEmail";
+import { PostgrestError } from "@supabase/postgrest-js";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -21,7 +22,7 @@ export async function sendReminderEmail(email: string) {
     .eq("email", email)
     .eq("is_verified", false)) as {
     data: UnverifiedReservation[] | null;
-    error: any;
+    error: PostgrestError | null;
   };
 
   if (dbError) {
