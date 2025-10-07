@@ -52,25 +52,43 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  title: "Dashboard Geral | Admin Hotel Colonial Iguaçu",
+  title: "Reserva de Refeição | Hotel Colonial Iguaçu",
   description:
-    "Painel de administração para visualizar o resumo geral das reservas dos eventos especiais de fim de ano.",
+    "Garanta sua refeição no Hotel Colonial Iguaçu com praticidade e conforto. Preencha o formulário de reserva e aproveite momentos agradáveis em nosso restaurante.",
 
-  // ¡MUY IMPORTANTE! Esto evita que Google y otros buscadores indexen tu panel de admin.
+  openGraph: {
+    title: "Reserva de Refeição | Hotel Colonial Iguaçu",
+    description:
+      "Faça sua reserva de refeição de forma rápida e segura. Desfrute de pratos preparados com carinho no Hotel Colonial Iguaçu.",
+    url: "https://reservas.menucolonial.com.br",
+    siteName: "Hotel Colonial Iguaçu",
+    locale: "pt_BR",
+    type: "website",
+    images: [
+      {
+        url: "/images/social-share.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Restaurante do Hotel Colonial Iguaçu",
+      },
+    ],
+  },
+
   robots: {
-    index: false,
-    follow: false,
-    nocache: true,
+    index: true,
+    follow: true,
     googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true,
+      index: true,
+      follow: true,
     },
   },
 
-  // Opcional: Añade un favicon para una apariencia más profesional
   icons: {
-    icon: "/favicon.ico", // Asegúrate de tener un favicon.ico en tu carpeta /public
+    icon: "/favicon.ico",
+  },
+
+  alternates: {
+    canonical: "https://reservas.menucolonial.com.br",
   },
 };
 
