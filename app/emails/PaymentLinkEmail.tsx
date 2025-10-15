@@ -92,7 +92,7 @@ export const PaymentLinkEmail: React.FC<PaymentLinkEmailProps> = ({
               ))}
 
               <div className="flex justify-between items-center text-brand font-bold text-xl pt-4">
-                <span>VALOR TOTAL:</span>
+                <span>VALOR TOTAL: </span>
                 <span>R$ {grandTotal.toFixed(2)}</span>
               </div>
             </Section>
