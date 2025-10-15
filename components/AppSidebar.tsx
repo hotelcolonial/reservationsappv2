@@ -104,7 +104,7 @@ const menuGroups = [
     ],
   },
   {
-    label: "Lembretes", // Título de la nueva sección: "Recordatorios"
+    label: "Açoes", // Título de la nueva sección: "Recordatorios"
     icon: Bell, // Ícono de campana para la sección
     subItems: [
       {

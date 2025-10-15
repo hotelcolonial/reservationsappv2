@@ -39,15 +39,15 @@ export default function HeroSection() {
       <div className="flex-1 flex items-center justify-center px-6 sm:px-10 z-20">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h1 className="font-pinyon text-4xl sm:text-5xl md:text-6xl text-amber-300 leading-tight">
-            Celebre a Magia do Natal e a Energia do Réveillon
+            Uma Experiência Completa
           </h1>
           <h2 className="font-serif text-xl sm:text-2xl text-amber-200 mt-4">
-            Momentos inesquecíveis esperam por você no Hotel Colonial Iguaçu.
+            Reserve agora suas refeições de fim de ano no Hotel Colonial Iguaçu.
           </h2>
           <p className="font-radley text-lg text-amber-100/90 max-w-2xl mx-auto leading-relaxed">
-            Reserve já sua experiência especial de fim de ano e desfrute de
-            noites únicas repletas de encanto, boa gastronomia e celebração em
-            grande estilo.
+            Este evento é um benefício exclusivo para nossos hóspedes com
+            reserva confirmada e não é aberto ao público. Garanta sua mesa para
+            as celebrações mais especiais do ano.
           </p>
           <Button
             onClick={() => {

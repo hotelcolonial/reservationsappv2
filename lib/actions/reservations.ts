@@ -94,3 +94,27 @@ export async function verifyReservation(
   revalidatePath(`/admin/reservas/${eventSlug}`);
   return { success: true, data: updatedReservation };
 }
+
+// --- INICIA NUEVA FUNCIÓN ---
+export async function deleteReservation(
+  reservationId: number,
+  eventSlug: string
+) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("reservations")
+    .delete()
+    .eq("id", reservationId);
+
+  if (error) {
+    console.error("Error deleting reservation:", error.message);
+    return { success: false, error: "Falha ao deletar a reserva." };
+  }
+
+  // Refresca los datos de la página para que la fila eliminada desaparezca.
+  revalidatePath(`/admin/reservas/${eventSlug}`);
+
+  return { success: true, message: "Reserva deletada com sucesso." };
+}
+// --- FIN DE LA NUEVA FUNCIÓN ---

@@ -5,9 +5,6 @@ import { Users, Banknote, CalendarCheck } from "lucide-react";
 import { StackedPerformanceChart } from "@/components/charts/stacked-performance-chart";
 import { EventNameLegend } from "@/components/charts/event-name-legend";
 
-// Forzamos el renderizado dinámico ya que depende de datos que cambian
-export const dynamic = "force-dynamic";
-
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
   const { data: dashboardData, error } = await supabase.rpc(

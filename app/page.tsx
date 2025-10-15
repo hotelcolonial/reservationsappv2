@@ -9,9 +9,9 @@ export default function Home() {
   return (
     <div>
       <HeroSection />
+      <ReservationFormSection />
       <FeaturesSection />
       <PackagesSection />
-      <ReservationFormSection />
       <CallToActionSection />
       <Footer />
     </div>

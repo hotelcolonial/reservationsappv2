@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Reservation } from "@/lib/types"; // Importa el tipo que definimos
 import { EditableLocatorCell } from "./editable-locator-cell";
 import { VerificationCell } from "./verification-cell";
+import { ActionsCell } from "./actions-cell";
 
 // Esta es la definición de nuestras columnas
 export const getColumns = (eventSlug: string): ColumnDef<Reservation>[] => [
@@ -65,5 +66,12 @@ export const getColumns = (eventSlug: string): ColumnDef<Reservation>[] => [
         <VerificationCell reservation={row.original} eventSlug={eventSlug} />
       );
     },
+  },
+  {
+    id: "actions",
+    header: "Ações",
+    cell: ({ row }) => (
+      <ActionsCell reservation={row.original} eventSlug={eventSlug} />
+    ),
   },
 ];
