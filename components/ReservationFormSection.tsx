@@ -159,8 +159,8 @@ export default function ReservationFormSection() {
           id: "Confirmado", // No enviamos el ID real
           name: mealDetail.name,
           date: mealDetail.id.includes("natal")
-            ? "Dezembro de 2024"
-            : "Final de Dezembro / Início de 2025",
+            ? "Dezembro de 2025"
+            : "Final de Dezembro / Início de 2026",
           price: eventPrice,
         };
       });

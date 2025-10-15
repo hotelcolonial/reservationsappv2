@@ -45,9 +45,7 @@ const PreReservationClientEmail: React.FC<PreReservationEmailProps> = ({
   reservationDate,
 }) => {
   // Creamos un asunto dinámico para el botón de contacto
-  const subjectLine = `Dúvida sobre as pré-reservas #${bookedEvents
-    .map((e) => e.id)
-    .join(", #")}`;
+  const subjectLine = `Dúvida sobre as pré-reservas de ${fullName}`;
 
   return (
     <Html>
@@ -123,9 +121,9 @@ const PreReservationClientEmail: React.FC<PreReservationEmailProps> = ({
                     <Text className="text-gray-500 m-0">{event.date}</Text>
                   </Column>
                   <Column className="text-right">
-                    <Text className="font-semibold text-gray-600 m-0">
+                    {/*   <Text className="font-semibold text-gray-600 m-0">
                       ID: #{event.id}
-                    </Text>
+                    </Text> */}
                   </Column>
                 </Row>
                 <Row className="mt-2">
