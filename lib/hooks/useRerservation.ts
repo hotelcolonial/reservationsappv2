@@ -38,31 +38,32 @@ export function useReservations(eventSlug?: string) {
 
   async function createReservation(
     newReservationData: Omit<Reservation, "id" | "createdAt" | "updatedAt">
-  ) {
+  ): Promise<void> {
+    // <-- Ahora no devuelve nada (void)
     if (!supabase) throw new Error("Cliente Supabase não disponível.");
 
     try {
-      const createdReservation = await reservationService.createReservation(
-        supabase,
-        newReservationData
-      );
+      // Simplemente llamamos a la función. Ya no devuelve la reserva creada.
+      await reservationService.createReservation(supabase, newReservationData);
 
-      setReservations((prev) => [createdReservation, ...prev]);
-      return createdReservation;
+      // Opcional: Si quieres que la lista se actualice después de crear,
+      // puedes llamar a loadReservations() aquí.
+      // await loadReservations();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Falha ao criar a reserva."
-      );
+      // Propagamos el error para que el componente que llama lo maneje.
+      throw err;
     }
   }
 
+  // --- FUNCIÓN CORREGIDA ---
   async function createReservationsForEvents(
     reservationDetails: Omit<
       Reservation,
       "id" | "createdAt" | "updatedAt" | "event_type_id" | "total"
     >,
     selectedMeals: { slug: string; price: number }[]
-  ): Promise<Reservation[]> {
+  ): Promise<void> {
+    // <-- Ahora no devuelve nada (void)
     if (!supabase) throw new Error("Cliente Supabase não disponível.");
 
     const reservationPromises = selectedMeals.map((meal) => {
@@ -82,55 +83,17 @@ export function useReservations(eventSlug?: string) {
       );
     });
 
-    const createdReservations = await Promise.all(reservationPromises);
-    return createdReservations;
+    // Esperamos a que todas las promesas de inserción se completen.
+    await Promise.all(reservationPromises);
+
+    // Ya no hay nada que devolver, la función simplemente termina con éxito.
   }
-
-  /* async function updateReservation(
-    reservationId: string,
-    updates: Partial<Omit<Reservation, "id" | "createdAt" | "updatedAt">>
-  ) {
-    if (!supabase) throw new Error("Cliente Supabase não disponível.");
-
-    try {
-      const updatedReservation = await reservationService.updateReservation(
-        supabase,
-        reservationId,
-        updates
-      );
-
-      setReservations((prev) =>
-        prev.map((r) => (r.id === reservationId ? updatedReservation : r))
-      );
-      return updatedReservation;
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Falha ao atualizar a reserva."
-      );
-    }
-  } */
-
-  /*   async function deleteReservation(reservationId: string) {
-    if (!supabase) throw new Error("Cliente Supabase não disponível.");
-
-    try {
-      await reservationService.deleteReservation(supabase, reservationId);
-      // Elimina la reserva del array del estado
-      setReservations((prev) => prev.filter((r) => r.id !== reservationId));
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Falha ao deletar a reserva."
-      );
-    }
-  } */
 
   return {
     reservations,
     loading,
     error,
     createReservation,
-    /*     updateReservation, */
-    /*     deleteReservation, */
     createReservationsForEvents,
     refreshReservations: loadReservations,
   };

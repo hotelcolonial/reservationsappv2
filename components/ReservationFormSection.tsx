@@ -86,9 +86,6 @@ export default function ReservationFormSection() {
   const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [createdReservationsInfo, setCreatedReservationsInfo] = useState<
-    { id: number; name: string }[]
-  >([]);
 
   // --- ESTADOS DE ENVÍO Y ERROR (UI) ---
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -140,8 +137,8 @@ export default function ReservationFormSection() {
     );
 
     try {
-      // Esto se mantiene igual: creas las reservas en la BBDD
-      const newReservations = await createReservationsForEvents(
+      // Llamamos a la función de creación, pero ya no necesitamos guardar el resultado.
+      await createReservationsForEvents(
         {
           name,
           email,
@@ -154,64 +151,45 @@ export default function ReservationFormSection() {
         selectedMealDetails
       );
 
-      // --- INICIA EL NUEVO BLOQUE: ENVÍO DE EMAIL DE CONFIRMACIÓN ---
-      if (newReservations) {
-        // 1. Preparamos los datos que el email necesita
-        const eventsForEmail = newReservations.map((reservation, index) => {
-          const mealDetail = selectedMealDetails[index];
-          const eventPrice =
-            mealDetail.price * adults + mealDetail.price * children_7_11 * 0.6;
-
-          return {
-            id: reservation.id.toString(), // El email espera un string
-            name: mealDetail.name,
-            date: mealDetail.id.includes("natal")
-              ? "Dezembro de 2024"
-              : "Final de Dezembro / Início de 2025", // Puedes hacer esto más dinámico si quieres
-            price: eventPrice,
-          };
-        });
-
-        const emailPayload = {
-          fullName: name,
-          email: email,
-          adults: adults,
-          children0to6: children_0_6,
-          children7to11: children_7_11,
-          bookedEvents: eventsForEmail,
-          grandTotal: totalPrice,
-          reservationDate: new Date().toLocaleDateString("pt-BR"),
+      // --- Envío de Email (sin cambios, ya era seguro) ---
+      const eventsForEmail = selectedMealDetails.map((mealDetail) => {
+        const eventPrice =
+          mealDetail.price * adults + mealDetail.price * children_7_11 * 0.6;
+        return {
+          id: "Confirmado", // No enviamos el ID real
+          name: mealDetail.name,
+          date: mealDetail.id.includes("natal")
+            ? "Dezembro de 2024"
+            : "Final de Dezembro / Início de 2025",
+          price: eventPrice,
         };
+      });
 
-        // 2. Hacemos la llamada a nuestra API para enviar el email
-        try {
-          await fetch("/api/emails", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(emailPayload),
-          });
-        } catch (emailError) {
-          // Si el email falla, no bloqueamos al usuario.
-          // La reserva ya está en la BBDD.
-          console.warn(
-            "La reserva se creó, pero el email de confirmación falló:",
-            emailError
-          );
-        }
+      const emailPayload = {
+        fullName: name,
+        email: email,
+        adults: adults,
+        children0to6: children_0_6,
+        children7to11: children_7_11,
+        bookedEvents: eventsForEmail,
+        grandTotal: totalPrice,
+        reservationDate: new Date().toLocaleDateString("pt-BR"),
+      };
 
-        // --- FIN DEL NUEVO BLOQUE ---
-
-        // Esto se mantiene igual: preparamos la info para el modal
-        const infoForModal = newReservations.map((reservation, index) => ({
-          id: reservation.id,
-          name: selectedMealDetails[index].name,
-        }));
-        setCreatedReservationsInfo(infoForModal);
+      try {
+        await fetch("/api/emails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(emailPayload),
+        });
+      } catch (emailError) {
+        console.warn(
+          "La reserva se creó, pero el email de confirmación falló:",
+          emailError
+        );
       }
 
-      // Abrimos el modal al final
+      // Simplemente abrimos el modal. No necesitamos más información.
       setModalOpen(true);
     } catch (err) {
       setError(
@@ -452,34 +430,13 @@ export default function ReservationFormSection() {
                 Parabéns!
               </DialogTitle>
               <DialogDescription className="font-radley text-lg text-[#0a3a2a]/80 text-center mt-4 space-y-2">
-                <span>Sua pré-reserva foi realizada com sucesso.</span>
+                <span>Sua pré-reserva foi realizada com sucesso. </span>
                 <span>
                   Em breve, nossa equipe comercial entrará em contato para
                   finalizar os detalhes e o pagamento.
                 </span>
               </DialogDescription>
             </DialogHeader>
-
-            <div className="my-6 py-4 px-6 bg-[#0a3a2a]/5 rounded-lg border border-[#0a3a2a]/10">
-              <div className="text-center mb-3">
-                <span className="font-radley text-sm text-[#0a3a2a]/60">
-                  Detalhes da sua Pré-Reserva
-                </span>
-              </div>
-              <div className="space-y-2 text-center">
-                {/* Iteramos sobre el estado para mostrar cada reserva */}
-                {createdReservationsInfo.map((info) => (
-                  <div key={info.id}>
-                    <span className="font-serif text-lg text-[#0a3a2a] font-bold tracking-wider">
-                      ID: #{info.id}
-                    </span>
-                    <p className="font-radley text-sm text-[#0a3a2a] -mt-1">
-                      {info.name}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             {/* Decoración festiva */}
             <div className="flex justify-center gap-2 my-4">

@@ -72,18 +72,18 @@ export const reservationService = {
   async createReservation(
     supabase: SupabaseClient,
     newReservation: Omit<Reservation, "id" | "createdAt" | "updatedAt">
-  ): Promise<Reservation> {
-    const { data, error } = await supabase
+  ): Promise<null> {
+    // <-- Ahora devuelve null, porque no leemos la respuesta
+    const { error } = await supabase
       .from("reservations")
-      .insert(newReservation)
-      .select()
-      .single();
+      .insert(newReservation); // <-- Se eliminó .select().single()
 
     if (error) {
       console.error("Error creating reservation:", error);
       throw error;
     }
-    return data;
+    // Como no hay .select(), 'data' es null. Simplemente devolvemos null para indicar éxito.
+    return null;
   },
 
   async createReservationForEvent(
@@ -93,7 +93,8 @@ export const reservationService = {
       Reservation,
       "id" | "createdAt" | "updatedAt" | "event_type_id"
     >
-  ): Promise<Reservation> {
+  ): Promise<null> {
+    // <-- También devuelve null
     const { data: eventType, error: eventError } = await supabase
       .from("event_types")
       .select("id")
@@ -110,9 +111,10 @@ export const reservationService = {
 
     const newReservationData = {
       ...reservationDetails,
-      event_type_id: eventType.id, // Añadimos el ID del evento encontrado.
+      event_type_id: eventType.id,
     };
 
+    // Llama a la versión corregida de createReservation
     return this.createReservation(supabase, newReservationData);
   },
   // --- FIN DE LA NUEVA FUNCIÓN ---

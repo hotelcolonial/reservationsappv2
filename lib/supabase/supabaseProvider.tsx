@@ -23,22 +23,30 @@ export default function SupabaseProvider({
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!session) return;
-    const client = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        accessToken: () => session.getToken(),
-      }
-    );
+    // Si hay una sesión, crea un cliente autenticado.
+    if (session) {
+      const client = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          accessToken: () => session.getToken(),
+        }
+      );
+      setSupabase(client);
+    } else {
+      // Si NO hay sesión, crea un cliente anónimo.
+      const client = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      setSupabase(client);
+    }
 
-    setSupabase(client);
     setIsLoaded(true);
   }, [session]);
 
   return (
     <Context.Provider value={{ supabase, isLoaded }}>
-      {/* {!isLoaded ? <div> Loading...</div> : children} */}
       {children}
     </Context.Provider>
   );
