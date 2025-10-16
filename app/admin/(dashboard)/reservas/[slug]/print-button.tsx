@@ -11,7 +11,7 @@ export function PrintButton() {
   return (
     <Button
       onClick={handlePrint}
-      className="bg-green-600 hover:bg-green-700 no-print" // <-- Añadimos la clase 'no-print'
+      className="bg-green-600 hover:bg-green-700 no-print cursor-pointer" // <-- Añadimos la clase 'no-print'
     >
       <Printer className="mr-2 h-4 w-4" />
       Imprimir Lista
