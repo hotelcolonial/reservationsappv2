@@ -51,7 +51,7 @@ export function ActionsCell({ reservation, eventSlug }: ActionsCellProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Abrir menu</span>
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4 cursor-pointer" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -65,7 +65,7 @@ export function ActionsCell({ reservation, eventSlug }: ActionsCellProps) {
             }}
             className="text-red-600 focus:text-red-600"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-2 h-4 w-4 cursor-pointer" />
             Deletar Reserva
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -82,11 +82,13 @@ export function ActionsCell({ reservation, eventSlug }: ActionsCellProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel className="cursor-pointer">
+            Cancelar
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isPending}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-red-600 hover:bg-red-700 cursor-pointer"
           >
             {isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
