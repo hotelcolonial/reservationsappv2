@@ -87,7 +87,10 @@ export const PaymentLinkEmail: React.FC<PaymentLinkEmailProps> = ({
                   className="flex justify-between items-center text-gray-600 py-2 border-b"
                 >
                   <span>{res.event_types?.name || "Evento Especial"}</span>
-                  <span className="font-medium">R$ {res.total.toFixed(2)}</span>
+                  <span className="font-medium">
+                    {" "}
+                    R$ {res.total.toFixed(2)}
+                  </span>
                 </div>
               ))}
 

@@ -14,80 +14,107 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-// Definición de los paquetes de comida con el SLUG
-const natalOptions = [
+// 1. DEFINICIÓN DE LA INTERFAZ PARA EVITAR EL ERROR "NEVER"
+interface MealOption {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice: number;
+  slug: string;
+}
+
+// 2. APLICACIÓN DEL TIPO MealOption[] A LOS ARRAYS
+const natalOptions: MealOption[] = [
   {
     id: "natal-1",
-    name: "Jantar de Boas-Vindas Italiano",
-    price: 160,
+    name: "Jantar de Boas-Vindas Italiano (23/12)",
+    price: 110,
+    originalPrice: 160,
     slug: "jantar-23",
   },
   {
     id: "natal-2",
-    name: "Almoço de Véspera (buffet simples)",
+    name: "Almoço de Véspera (24/12)",
     price: 90,
+    originalPrice: 90,
     slug: "almoco-vespera-natal",
   },
   {
     id: "natal-3",
-    name: "Jantar Especial de Véspera de Natal",
-    price: 260,
+    name: "Jantar Especial de Véspera (24/12)",
+    price: 220,
+    originalPrice: 260,
     slug: "jantar-vespera-natal",
   },
-  { id: "natal-4", name: "Almoço de Natal", price: 170, slug: "almoco-natal" },
-  { id: "natal-5", name: "Jantar de Natal", price: 170, slug: "jantar-natal" },
+  {
+    id: "natal-4",
+    name: "Almoço de Natal (25/12)",
+    price: 110,
+    originalPrice: 170,
+    slug: "almoco-natal",
+  },
+  {
+    id: "natal-5",
+    name: "Jantar de Natal (25/12)",
+    price: 110,
+    originalPrice: 170,
+    slug: "jantar-natal",
+  },
 ];
 
-const reveillonOptions = [
+const reveillonOptions: MealOption[] = [
   {
     id: "reveillon-1",
-    name: "Jantar de Boas-Vindas Italiano",
-    price: 180,
+    name: "Jantar de Boas-Vindas Italiano (30/12)",
+    price: 130,
+    originalPrice: 180,
     slug: "jantar-30",
   },
   {
     id: "reveillon-2",
-    name: "Almoço de Véspera",
+    name: "Almoço de Véspera (31/12)",
     price: 90,
+    originalPrice: 90,
     slug: "almoco-vespera-reveillon",
   },
   {
     id: "reveillon-3",
-    name: "Jantar de Réveillon",
-    price: 380,
+    name: "Jantar de Réveillon (31/12)",
+    price: 320,
+    originalPrice: 380,
     slug: "jantar-vespera-reveillon",
   },
   {
     id: "reveillon-4",
-    name: "Almoço de Ano Novo",
-    price: 210,
+    name: "Almoço de Ano Novo (01/01)",
+    price: 130,
+    originalPrice: 210,
     slug: "almoco-ano-novo",
   },
   {
     id: "reveillon-5",
-    name: "Jantar de Ano Novo",
-    price: 210,
+    name: "Jantar de Ano Novo (01/01)",
+    price: 130,
+    originalPrice: 210,
     slug: "jantar-ano-novo",
   },
 ];
 
-const allMealOptions = [...natalOptions, ...reveillonOptions];
+const allMealOptions: MealOption[] = [...natalOptions, ...reveillonOptions];
 
 export default function ReservationFormSection() {
-  // --- LÓGICA DEL HOOK ---
-  const { createReservationsForEvents } = useReservations(); // Obtenemos la función de creación del hook
+  const { createReservationsForEvents } = useReservations();
 
-  // --- ESTADOS DE LA UI DEL FORMULARIO ---/*  */
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [adults, setAdults] = useState(1);
-  const [children_0_6, setChildren0_6] = useState(0); // Corregido: guion bajo
-  const [children_7_11, setChildren7_11] = useState(0); // Corregido: guion bajo
+  const [children_0_6, setChildren0_6] = useState(0);
+  const [children_7_11, setChildren7_11] = useState(0);
   const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [totalSavings, setTotalSavings] = useState(0);
 
-  // --- ESTADOS DE ENVÍO Y ERROR (UI) ---
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,16 +127,27 @@ export default function ReservationFormSection() {
   };
 
   useEffect(() => {
+    // Al usar MealOption[], TypeScript ahora sabe que 'option' tiene 'id', 'price', etc.
     const selectedMealsWithPrices = allMealOptions.filter((option) =>
       selectedMeals.includes(option.id)
     );
+
     const sumOfSelectedPrices = selectedMealsWithPrices.reduce(
-      (sum, meal) => sum + meal.price,
+      (sum, meal) => sum + meal.price, // Aquí es donde ocurría el error, ahora 'meal' es de tipo MealOption
       0
     );
     const total =
       sumOfSelectedPrices * adults + sumOfSelectedPrices * children_7_11 * 0.6;
     setTotalPrice(total);
+
+    const sumOfOriginalPrices = selectedMealsWithPrices.reduce((sum, meal) => {
+      // TypeScript ahora sabe que originalPrice existe en MealOption
+      return sum + meal.originalPrice;
+    }, 0);
+
+    const totalOriginal =
+      sumOfOriginalPrices * adults + sumOfOriginalPrices * children_7_11 * 0.6;
+    setTotalSavings(totalOriginal - total);
   }, [adults, children_7_11, selectedMeals]);
 
   const resetForm = () => {
@@ -137,7 +175,8 @@ export default function ReservationFormSection() {
     );
 
     try {
-      // Llamamos a la función de creación, pero ya no necesitamos guardar el resultado.
+      // Omitimos originalPrice al enviar si tu función createReservationsForEvents no lo espera,
+      // pero si acepta objetos extra, esto funcionará. De lo contrario, mapeamos solo lo necesario.
       await createReservationsForEvents(
         {
           name,
@@ -151,12 +190,11 @@ export default function ReservationFormSection() {
         selectedMealDetails
       );
 
-      // --- Envío de Email (sin cambios, ya era seguro) ---
       const eventsForEmail = selectedMealDetails.map((mealDetail) => {
         const eventPrice =
           mealDetail.price * adults + mealDetail.price * children_7_11 * 0.6;
         return {
-          id: "Confirmado", // No enviamos el ID real
+          id: "Confirmado",
           name: mealDetail.name,
           date: mealDetail.id.includes("natal")
             ? "Dezembro de 2025"
@@ -183,20 +221,12 @@ export default function ReservationFormSection() {
           body: JSON.stringify(emailPayload),
         });
       } catch (emailError) {
-        console.warn(
-          "La reserva se creó, pero el email de confirmación falló:",
-          emailError
-        );
+        console.warn("Error enviando email:", emailError);
       }
 
-      // Simplemente abrimos el modal. No necesitamos más información.
       setModalOpen(true);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Ocorreu um erro ao enviar a reserva. Tente novamente."
-      );
+      setError(err instanceof Error ? err.message : "Erro ao processar");
     } finally {
       setIsSubmitting(false);
     }
@@ -218,8 +248,7 @@ export default function ReservationFormSection() {
           </div>
           <p className="font-radley text-[#0a3a2a]/90 max-w-2xl mx-auto">
             Reserve sua mesa para as celebrações mais especiais do ano no Hotel
-            Colonial Iguaçu. Preencha o formulário abaixo para garantir sua
-            vaga.
+            Colonial Iguaçu.
           </p>
         </div>
 
@@ -234,7 +263,6 @@ export default function ReservationFormSection() {
               </Label>
               <Input
                 id="name"
-                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -317,62 +345,145 @@ export default function ReservationFormSection() {
               Escolha suas Celebrações
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6">
-                <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-4 text-center">
+              {/* --- Sección de Navidad con Oferta --- */}
+              <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  Oferta até 20/12
+                </div>
+
+                <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
                   Festividades Natalinas
                 </h4>
+                <p className="text-center text-xs text-red-600 font-semibold mb-4">
+                  *Preços promocionais por tempo limitado
+                </p>
+
                 <div className="space-y-4">
-                  {natalOptions.map((option) => (
-                    <div key={option.id} className="flex items-start space-x-2">
-                      <input
-                        type="checkbox"
-                        id={option.id}
-                        checked={selectedMeals.includes(option.id)}
-                        onChange={(e) =>
-                          handleMealSelection(option.id, e.target.checked)
-                        }
-                        className="mt-1"
-                      />
-                      <label
-                        htmlFor={option.id}
-                        className="flex-1 font-radley text-[#0a3a2a]"
+                  {natalOptions.map((option) => {
+                    const discountPercentage = Math.round(
+                      ((option.originalPrice - option.price) /
+                        option.originalPrice) *
+                        100
+                    );
+                    const hasDiscount = discountPercentage > 0;
+
+                    return (
+                      <div
+                        key={option.id}
+                        className="flex items-start space-x-2"
                       >
-                        {option.name}
-                        <span className="block text-sm text-[#0a3a2a]/70">
-                          R$ {option.price.toFixed(2)}
-                        </span>
-                      </label>
-                    </div>
-                  ))}
+                        <input
+                          type="checkbox"
+                          id={option.id}
+                          checked={selectedMeals.includes(option.id)}
+                          onChange={(e) =>
+                            handleMealSelection(option.id, e.target.checked)
+                          }
+                          className="mt-1"
+                        />
+                        <label
+                          htmlFor={option.id}
+                          className="flex-1 font-radley text-[#0a3a2a]"
+                        >
+                          <div className="flex justify-between items-start">
+                            <span>{option.name}</span>
+                            {hasDiscount && (
+                              <span className="bg-red-100 text-red-700 text-sm px-2 py-0.5 rounded ml-2 font-bold whitespace-nowrap border border-red-200">
+                                -{discountPercentage}%
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            {hasDiscount && (
+                              <span className="text-sm text-gray-400 line-through">
+                                R$ {option.originalPrice.toFixed(2)}
+                              </span>
+                            )}
+                            <span
+                              className={`font-bold ${
+                                hasDiscount
+                                  ? "text-md text-red-600"
+                                  : "text-sm text-[#0a3a2a]/70"
+                              }`}
+                            >
+                              R$ {option.price.toFixed(2)}
+                            </span>
+                          </div>
+                        </label>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              <div className="bg-[#faf7f0] border border-amber-200/40 rounded-lg p-6">
-                <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-4 text-center">
+
+              {/* --- Sección Reveillon con Oferta --- */}
+              <div className="bg-[#faf7f0] border border-amber-200/40 rounded-lg p-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  Oferta até 26/12
+                </div>
+
+                <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
                   Celebração Dourada
                 </h4>
+                <p className="text-center text-xs text-red-600 font-semibold mb-4">
+                  *Preços promocionais por tempo limitado
+                </p>
+
                 <div className="space-y-4">
-                  {reveillonOptions.map((option) => (
-                    <div key={option.id} className="flex items-start space-x-2">
-                      <input
-                        type="checkbox"
-                        id={option.id}
-                        checked={selectedMeals.includes(option.id)}
-                        onChange={(e) =>
-                          handleMealSelection(option.id, e.target.checked)
-                        }
-                        className="mt-1"
-                      />
-                      <label
-                        htmlFor={option.id}
-                        className="flex-1 font-radley text-[#0a3a2a]"
+                  {reveillonOptions.map((option) => {
+                    const discountPercentage = Math.round(
+                      ((option.originalPrice - option.price) /
+                        option.originalPrice) *
+                        100
+                    );
+                    const hasDiscount = discountPercentage > 0;
+
+                    return (
+                      <div
+                        key={option.id}
+                        className="flex items-start space-x-2"
                       >
-                        {option.name}
-                        <span className="block text-sm text-[#0a3a2a]/70">
-                          R$ {option.price.toFixed(2)}
-                        </span>
-                      </label>
-                    </div>
-                  ))}
+                        <input
+                          type="checkbox"
+                          id={option.id}
+                          checked={selectedMeals.includes(option.id)}
+                          onChange={(e) =>
+                            handleMealSelection(option.id, e.target.checked)
+                          }
+                          className="mt-1"
+                        />
+                        <label
+                          htmlFor={option.id}
+                          className="flex-1 font-radley text-[#0a3a2a]"
+                        >
+                          <div className="flex justify-between items-start">
+                            <span>{option.name}</span>
+                            {hasDiscount && (
+                              <span className="bg-red-100 text-red-700 text-sm px-2 py-0.5 rounded ml-2 font-bold whitespace-nowrap border border-red-200">
+                                -{discountPercentage}%
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            {hasDiscount && (
+                              <span className="text-sm text-gray-400 line-through">
+                                R$ {option.originalPrice.toFixed(2)}
+                              </span>
+                            )}
+                            <span
+                              className={`font-bold ${
+                                hasDiscount
+                                  ? "text-md text-red-600"
+                                  : "text-sm text-[#0a3a2a]/70"
+                              }`}
+                            >
+                              R$ {option.price.toFixed(2)}
+                            </span>
+                          </div>
+                        </label>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -383,6 +494,12 @@ export default function ReservationFormSection() {
               <p className="text-center text-red-600 font-semibold">{error}</p>
             )}
             <div className="text-center">
+              {totalSavings > 0 && (
+                <p className="text-sm text-red-600 font-medium mb-1">
+                  Você está economizando: R$ {totalSavings.toFixed(2)} nesta
+                  reserva!
+                </p>
+              )}
               <p className="font-radley text-lg text-[#0a3a2a]">
                 <span className="font-semibold">Valor Total Estimado:</span>{" "}
                 <span className="font-greatvibes text-2xl">
@@ -402,10 +519,9 @@ export default function ReservationFormSection() {
             </div>
           </div>
         </form>
-        {/* Parte 5: Modal de Confirmación */}
+
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogContent className="bg-gradient-to-b from-[#faf7f0] to-white p-8 rounded-xl border-2 border-amber-100 shadow-lg max-w-md mx-auto">
-            {/* Decoración superior */}
             <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
               <div className="bg-[#0a3a2a] p-3 rounded-full border-4 border-amber-100">
                 <svg
@@ -433,12 +549,12 @@ export default function ReservationFormSection() {
                 <span>Sua pré-reserva foi realizada com sucesso. </span>
                 <span>
                   Em breve, nossa equipe comercial entrará em contato para
-                  finalizar os detalhes e o pagamento.
+                  finalizar os detalhes e o pagamento com os valores
+                  promocionais garantidos.
                 </span>
               </DialogDescription>
             </DialogHeader>
 
-            {/* Decoración festiva */}
             <div className="flex justify-center gap-2 my-4">
               <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-amber-200 to-transparent"></div>
               <div className="text-amber-300">✦</div>

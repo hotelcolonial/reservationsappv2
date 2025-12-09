@@ -63,9 +63,9 @@ export function ActionsCell({ reservation, eventSlug }: ActionsCellProps) {
               e.preventDefault();
               setIsDeleteDialogOpen(true);
             }}
-            className="text-red-600 focus:text-red-600"
+            className="text-red-600 focus:text-red-600 cursor-pointer"
           >
-            <Trash2 className="mr-2 h-4 w-4 cursor-pointer" />
+            <Trash2 className="mr-2 h-4 w-4" />
             Deletar Reserva
           </DropdownMenuItem>
         </DropdownMenuContent>
