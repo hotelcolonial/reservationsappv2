@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-// 1. DEFINICIÓN DE LA INTERFAZ PARA EVITAR EL ERROR "NEVER"
+// 1. INTERFAZ
 interface MealOption {
   id: string;
   name: string;
@@ -23,7 +23,7 @@ interface MealOption {
   slug: string;
 }
 
-// 2. APLICACIÓN DEL TIPO MealOption[] A LOS ARRAYS
+// 2. DATOS DE NAVIDAD
 const natalOptions: MealOption[] = [
   {
     id: "natal-1",
@@ -62,6 +62,7 @@ const natalOptions: MealOption[] = [
   },
 ];
 
+// 3. DATOS DE REVEILLON
 const reveillonOptions: MealOption[] = [
   {
     id: "reveillon-1",
@@ -107,9 +108,12 @@ export default function ReservationFormSection() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [adults, setAdults] = useState(1);
-  const [children_0_6, setChildren0_6] = useState(0);
-  const [children_7_11, setChildren7_11] = useState(0);
+
+  // SOLUCIÓN: Usamos <number | string> para permitir borrar el campo completamente
+  const [adults, setAdults] = useState<number | string>(1);
+  const [children_0_6, setChildren0_6] = useState<number | string>(0);
+  const [children_7_11, setChildren7_11] = useState<number | string>(0);
+
   const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -127,26 +131,31 @@ export default function ReservationFormSection() {
   };
 
   useEffect(() => {
-    // Al usar MealOption[], TypeScript ahora sabe que 'option' tiene 'id', 'price', etc.
     const selectedMealsWithPrices = allMealOptions.filter((option) =>
       selectedMeals.includes(option.id)
     );
 
+    // Convertimos a número seguro para los cálculos (si está vacío usa 0)
+    const numAdults = Number(adults) || 0;
+    const numChildren7_11 = Number(children_7_11) || 0;
+
     const sumOfSelectedPrices = selectedMealsWithPrices.reduce(
-      (sum, meal) => sum + meal.price, // Aquí es donde ocurría el error, ahora 'meal' es de tipo MealOption
+      (sum, meal) => sum + meal.price,
       0
     );
+
     const total =
-      sumOfSelectedPrices * adults + sumOfSelectedPrices * children_7_11 * 0.6;
+      sumOfSelectedPrices * numAdults +
+      sumOfSelectedPrices * numChildren7_11 * 0.6;
     setTotalPrice(total);
 
     const sumOfOriginalPrices = selectedMealsWithPrices.reduce((sum, meal) => {
-      // TypeScript ahora sabe que originalPrice existe en MealOption
       return sum + meal.originalPrice;
     }, 0);
 
     const totalOriginal =
-      sumOfOriginalPrices * adults + sumOfOriginalPrices * children_7_11 * 0.6;
+      sumOfOriginalPrices * numAdults +
+      sumOfOriginalPrices * numChildren7_11 * 0.6;
     setTotalSavings(totalOriginal - total);
   }, [adults, children_7_11, selectedMeals]);
 
@@ -170,20 +179,23 @@ export default function ReservationFormSection() {
       return;
     }
 
+    // Validación final antes de enviar: asegurarnos que sean números
+    const finalAdults = Number(adults) || 1;
+    const finalChildren0_6 = Number(children_0_6) || 0;
+    const finalChildren7_11 = Number(children_7_11) || 0;
+
     const selectedMealDetails = allMealOptions.filter((opt) =>
       selectedMeals.includes(opt.id)
     );
 
     try {
-      // Omitimos originalPrice al enviar si tu función createReservationsForEvents no lo espera,
-      // pero si acepta objetos extra, esto funcionará. De lo contrario, mapeamos solo lo necesario.
       await createReservationsForEvents(
         {
           name,
           email,
-          adults,
-          children_0_6,
-          children_7_11,
+          adults: finalAdults,
+          children_0_6: finalChildren0_6,
+          children_7_11: finalChildren7_11,
           locator: null,
           is_verified: false,
         },
@@ -192,7 +204,8 @@ export default function ReservationFormSection() {
 
       const eventsForEmail = selectedMealDetails.map((mealDetail) => {
         const eventPrice =
-          mealDetail.price * adults + mealDetail.price * children_7_11 * 0.6;
+          mealDetail.price * finalAdults +
+          mealDetail.price * finalChildren7_11 * 0.6;
         return {
           id: "Confirmado",
           name: mealDetail.name,
@@ -206,9 +219,9 @@ export default function ReservationFormSection() {
       const emailPayload = {
         fullName: name,
         email: email,
-        adults: adults,
-        children0to6: children_0_6,
-        children7to11: children_7_11,
+        adults: finalAdults,
+        children0to6: finalChildren0_6,
+        children7to11: finalChildren7_11,
         bookedEvents: eventsForEmail,
         grandTotal: totalPrice,
         reservationDate: new Date().toLocaleDateString("pt-BR"),
@@ -287,6 +300,7 @@ export default function ReservationFormSection() {
               />
             </div>
 
+            {/* --- ADULTOS (Corregido) --- */}
             <div>
               <Label
                 htmlFor="adults"
@@ -296,15 +310,24 @@ export default function ReservationFormSection() {
               </Label>
               <Input
                 id="adults"
-                type="number"
+                type="number" // Mantiene el teclado numérico en móvil
                 min="1"
                 value={adults}
-                onChange={(e) => setAdults(parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  // Si está vacío, permitimos string vacío. Si no, convertimos a número.
+                  setAdults(val === "" ? "" : parseInt(val));
+                }}
+                onBlur={() => {
+                  // Cuando el usuario sale de la casilla, si está vacío o es menor a 1, corregimos.
+                  if (adults === "" || Number(adults) < 1) setAdults(1);
+                }}
                 required
                 className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
 
+            {/* --- NIÑOS 0-6 (Corregido) --- */}
             <div>
               <Label
                 htmlFor="children06"
@@ -317,11 +340,19 @@ export default function ReservationFormSection() {
                 type="number"
                 min="0"
                 value={children_0_6}
-                onChange={(e) => setChildren0_6(parseInt(e.target.value) || 0)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setChildren0_6(val === "" ? "" : parseInt(val));
+                }}
+                onBlur={() => {
+                  if (children_0_6 === "" || Number(children_0_6) < 0)
+                    setChildren0_6(0);
+                }}
                 className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
 
+            {/* --- NIÑOS 7-11 (Corregido) --- */}
             <div className="md:col-span-2">
               <Label
                 htmlFor="children712"
@@ -334,7 +365,14 @@ export default function ReservationFormSection() {
                 type="number"
                 min="0"
                 value={children_7_11}
-                onChange={(e) => setChildren7_11(parseInt(e.target.value) || 0)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setChildren7_11(val === "" ? "" : parseInt(val));
+                }}
+                onBlur={() => {
+                  if (children_7_11 === "" || Number(children_7_11) < 0)
+                    setChildren7_11(0);
+                }}
                 className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
@@ -345,7 +383,7 @@ export default function ReservationFormSection() {
               Escolha suas Celebrações
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* --- Sección de Navidad con Oferta --- */}
+              {/* --- Sección de Navidad --- */}
               <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
                   Oferta até 20/12
@@ -416,7 +454,7 @@ export default function ReservationFormSection() {
                 </div>
               </div>
 
-              {/* --- Sección Reveillon con Oferta --- */}
+              {/* --- Sección Reveillon --- */}
               <div className="bg-[#faf7f0] border border-amber-200/40 rounded-lg p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
                   Oferta até 26/12
