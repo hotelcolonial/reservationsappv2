@@ -109,7 +109,7 @@ export default function ReservationFormSection() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  // SOLUCIÓN: Usamos <number | string> para permitir borrar el campo completamente
+  // Estados para inputs numéricos
   const [adults, setAdults] = useState<number | string>(1);
   const [children_0_6, setChildren0_6] = useState<number | string>(0);
   const [children_7_11, setChildren7_11] = useState<number | string>(0);
@@ -135,7 +135,6 @@ export default function ReservationFormSection() {
       selectedMeals.includes(option.id)
     );
 
-    // Convertimos a número seguro para los cálculos (si está vacío usa 0)
     const numAdults = Number(adults) || 0;
     const numChildren7_11 = Number(children_7_11) || 0;
 
@@ -179,7 +178,6 @@ export default function ReservationFormSection() {
       return;
     }
 
-    // Validación final antes de enviar: asegurarnos que sean números
     const finalAdults = Number(adults) || 1;
     const finalChildren0_6 = Number(children_0_6) || 0;
     const finalChildren7_11 = Number(children_7_11) || 0;
@@ -263,6 +261,54 @@ export default function ReservationFormSection() {
             Reserve sua mesa para as celebrações mais especiais do ano no Hotel
             Colonial Iguaçu.
           </p>
+
+          {/* --- BOTÓN LLAMATIVO DEL MENÚ --- */}
+          <div className="mt-8 flex justify-center">
+            <a
+              href="https://online.fliphtml5.com/tollw/xttx/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative inline-flex items-center gap-3 px-8 py-3 bg-[#0a3a2a] text-amber-200 rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-amber-200/30"
+            >
+              {/* Icono Menu */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="opacity-90"
+              >
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+
+              <span className="font-radley text-lg font-medium tracking-wide">
+                Confira o Menu e a Programação
+              </span>
+
+              {/* Flecha animada */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-transform group-hover:translate-x-1"
+              >
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+            </a>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-10">
@@ -300,7 +346,7 @@ export default function ReservationFormSection() {
               />
             </div>
 
-            {/* --- ADULTOS (Corregido) --- */}
+            {/* --- ADULTOS --- */}
             <div>
               <Label
                 htmlFor="adults"
@@ -310,16 +356,14 @@ export default function ReservationFormSection() {
               </Label>
               <Input
                 id="adults"
-                type="number" // Mantiene el teclado numérico en móvil
+                type="number"
                 min="1"
                 value={adults}
                 onChange={(e) => {
                   const val = e.target.value;
-                  // Si está vacío, permitimos string vacío. Si no, convertimos a número.
                   setAdults(val === "" ? "" : parseInt(val));
                 }}
                 onBlur={() => {
-                  // Cuando el usuario sale de la casilla, si está vacío o es menor a 1, corregimos.
                   if (adults === "" || Number(adults) < 1) setAdults(1);
                 }}
                 required
@@ -327,7 +371,7 @@ export default function ReservationFormSection() {
               />
             </div>
 
-            {/* --- NIÑOS 0-6 (Corregido) --- */}
+            {/* --- NIÑOS 0-6 --- */}
             <div>
               <Label
                 htmlFor="children06"
@@ -352,7 +396,7 @@ export default function ReservationFormSection() {
               />
             </div>
 
-            {/* --- NIÑOS 7-11 (Corregido) --- */}
+            {/* --- NIÑOS 7-11 --- */}
             <div className="md:col-span-2">
               <Label
                 htmlFor="children712"
@@ -386,7 +430,7 @@ export default function ReservationFormSection() {
               {/* --- Sección de Navidad --- */}
               <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  Oferta até 20/12
+                  Oferta Especial
                 </div>
 
                 <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
@@ -457,7 +501,7 @@ export default function ReservationFormSection() {
               {/* --- Sección Reveillon --- */}
               <div className="bg-[#faf7f0] border border-amber-200/40 rounded-lg p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  Oferta até 26/12
+                  Oferta Especial
                 </div>
 
                 <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
