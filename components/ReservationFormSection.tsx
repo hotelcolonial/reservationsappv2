@@ -23,7 +23,7 @@ interface MealOption {
   slug: string;
 }
 
-// 2. DATOS DE NAVIDAD
+// 2. DATOS DE NAVIDAD (Precios originales, pero se deshabilitarán)
 const natalOptions: MealOption[] = [
   {
     id: "natal-1",
@@ -62,40 +62,40 @@ const natalOptions: MealOption[] = [
   },
 ];
 
-// 3. DATOS DE REVEILLON
+// 3. DATOS DE REVEILLON (Precios Actualizados: Todo a 90 excepto la Cena a 280)
 const reveillonOptions: MealOption[] = [
   {
     id: "reveillon-1",
     name: "Jantar de Boas-Vindas Italiano (30/12)",
-    price: 130,
+    price: 90, // PRECIO FIJO 90
     originalPrice: 180,
     slug: "jantar-30",
   },
   {
     id: "reveillon-2",
     name: "Almoço de Véspera (31/12)",
-    price: 90,
+    price: 90, // PRECIO FIJO 90
     originalPrice: 90,
     slug: "almoco-vespera-reveillon",
   },
   {
     id: "reveillon-3",
     name: "Jantar de Réveillon (31/12)",
-    price: 320,
+    price: 280, // PRECIO REBAJADO A 280
     originalPrice: 380,
     slug: "jantar-vespera-reveillon",
   },
   {
     id: "reveillon-4",
     name: "Almoço de Ano Novo (01/01)",
-    price: 130,
+    price: 90, // PRECIO FIJO 90
     originalPrice: 210,
     slug: "almoco-ano-novo",
   },
   {
     id: "reveillon-5",
     name: "Jantar de Ano Novo (01/01)",
-    price: 130,
+    price: 90, // PRECIO FIJO 90
     originalPrice: 210,
     slug: "jantar-ano-novo",
   },
@@ -427,28 +427,22 @@ export default function ReservationFormSection() {
               Escolha suas Celebrações
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* --- Sección de Navidad --- */}
-              <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  Oferta Especial
+              {/* --- Sección de Navidad (CERRADA) --- */}
+              <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden opacity-60 grayscale-[0.5] cursor-not-allowed select-none">
+                {/* Badge de Encerrado */}
+                <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  Vendas Encerradas
                 </div>
 
                 <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
                   Festividades Natalinas
                 </h4>
-                <p className="text-center text-xs text-red-600 font-semibold mb-4">
-                  *Preços promocionais por tempo limitado
+                <p className="text-center text-xs text-gray-600 font-semibold mb-4">
+                  *Evento finalizado
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-4 pointer-events-none">
                   {natalOptions.map((option) => {
-                    const discountPercentage = Math.round(
-                      ((option.originalPrice - option.price) /
-                        option.originalPrice) *
-                        100
-                    );
-                    const hasDiscount = discountPercentage > 0;
-
                     return (
                       <div
                         key={option.id}
@@ -457,10 +451,7 @@ export default function ReservationFormSection() {
                         <input
                           type="checkbox"
                           id={option.id}
-                          checked={selectedMeals.includes(option.id)}
-                          onChange={(e) =>
-                            handleMealSelection(option.id, e.target.checked)
-                          }
+                          disabled={true}
                           className="mt-1"
                         />
                         <label
@@ -469,25 +460,9 @@ export default function ReservationFormSection() {
                         >
                           <div className="flex justify-between items-start">
                             <span>{option.name}</span>
-                            {hasDiscount && (
-                              <span className="bg-red-100 text-red-700 text-sm px-2 py-0.5 rounded ml-2 font-bold whitespace-nowrap border border-red-200">
-                                -{discountPercentage}%
-                              </span>
-                            )}
                           </div>
                           <div className="flex items-center gap-2 mt-1">
-                            {hasDiscount && (
-                              <span className="text-sm text-gray-400 line-through">
-                                R$ {option.originalPrice.toFixed(2)}
-                              </span>
-                            )}
-                            <span
-                              className={`font-bold ${
-                                hasDiscount
-                                  ? "text-md text-red-600"
-                                  : "text-sm text-[#0a3a2a]/70"
-                              }`}
-                            >
+                            <span className="text-sm text-[#0a3a2a]/70">
                               R$ {option.price.toFixed(2)}
                             </span>
                           </div>
@@ -498,7 +473,7 @@ export default function ReservationFormSection() {
                 </div>
               </div>
 
-              {/* --- Sección Reveillon --- */}
+              {/* --- Sección Reveillon (ACTIVA CON DESCUENTOS NUEVOS) --- */}
               <div className="bg-[#faf7f0] border border-amber-200/40 rounded-lg p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
                   Oferta Especial
@@ -508,11 +483,12 @@ export default function ReservationFormSection() {
                   Celebração Dourada
                 </h4>
                 <p className="text-center text-xs text-red-600 font-semibold mb-4">
-                  *Preços promocionais por tempo limitado
+                  *Últimas vagas promocionais
                 </p>
 
                 <div className="space-y-4">
                   {reveillonOptions.map((option) => {
+                    // Cálculo automático del porcentaje basado en los nuevos precios (90 o 280)
                     const discountPercentage = Math.round(
                       ((option.originalPrice - option.price) /
                         option.originalPrice) *
