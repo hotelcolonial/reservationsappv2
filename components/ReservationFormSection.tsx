@@ -62,7 +62,7 @@ const natalOptions: MealOption[] = [
   },
 ];
 
-// 3. DATOS DE REVEILLON (AHORA CERRADO TAMBIÉN)
+// 3. DATOS DE REVEILLON (MANTENEMOS TODOS, PERO FILTRAREMOS VISUALMENTE)
 const reveillonOptions: MealOption[] = [
   {
     id: "reveillon-1",
@@ -169,8 +169,78 @@ export default function ReservationFormSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Bloqueo adicional por seguridad
-    return;
+    setError(null);
+    setIsSubmitting(true);
+
+    if (selectedMeals.length === 0) {
+      setError("Por favor, selecione pelo menos uma refeição.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const finalAdults = Number(adults) || 1;
+    const finalChildren0_6 = Number(children_0_6) || 0;
+    const finalChildren7_11 = Number(children_7_11) || 0;
+
+    const selectedMealDetails = allMealOptions.filter((opt) =>
+      selectedMeals.includes(opt.id)
+    );
+
+    try {
+      await createReservationsForEvents(
+        {
+          name,
+          email,
+          adults: finalAdults,
+          children_0_6: finalChildren0_6,
+          children_7_11: finalChildren7_11,
+          locator: null,
+          is_verified: false,
+        },
+        selectedMealDetails
+      );
+
+      const eventsForEmail = selectedMealDetails.map((mealDetail) => {
+        const eventPrice =
+          mealDetail.price * finalAdults +
+          mealDetail.price * finalChildren7_11 * 0.6;
+        return {
+          id: "Confirmado",
+          name: mealDetail.name,
+          date: mealDetail.id.includes("natal")
+            ? "Dezembro de 2025"
+            : "Final de Dezembro / Início de 2026",
+          price: eventPrice,
+        };
+      });
+
+      const emailPayload = {
+        fullName: name,
+        email: email,
+        adults: finalAdults,
+        children0to6: finalChildren0_6,
+        children7to11: finalChildren7_11,
+        bookedEvents: eventsForEmail,
+        grandTotal: totalPrice,
+        reservationDate: new Date().toLocaleDateString("pt-BR"),
+      };
+
+      try {
+        await fetch("/api/emails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(emailPayload),
+        });
+      } catch (emailError) {
+        console.warn("Error enviando email:", emailError);
+      }
+
+      setModalOpen(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao processar");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -192,7 +262,7 @@ export default function ReservationFormSection() {
             Colonial Iguaçu.
           </p>
 
-          {/* --- BOTÓN MENÚ (AÚN VISIBLE PARA CONSULTA) --- */}
+          {/* --- BOTÓN MENÚ --- */}
           <div className="mt-8 flex flex-col items-center gap-4">
             <a
               href="https://online.fliphtml5.com/tollw/Pacotes-Reveillon/"
@@ -256,8 +326,8 @@ export default function ReservationFormSection() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                disabled // Input deshabilitado
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
+                required
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
 
@@ -273,8 +343,8 @@ export default function ReservationFormSection() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled // Input deshabilitado
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
+                required
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
 
@@ -295,8 +365,11 @@ export default function ReservationFormSection() {
                   const val = e.target.value;
                   setAdults(val === "" ? "" : parseInt(val));
                 }}
-                disabled // Input deshabilitado
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
+                onBlur={() => {
+                  if (adults === "" || Number(adults) < 1) setAdults(1);
+                }}
+                required
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
 
@@ -317,8 +390,11 @@ export default function ReservationFormSection() {
                   const val = e.target.value;
                   setChildren0_6(val === "" ? "" : parseInt(val));
                 }}
-                disabled // Input deshabilitado
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
+                onBlur={() => {
+                  if (children_0_6 === "" || Number(children_0_6) < 0)
+                    setChildren0_6(0);
+                }}
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
 
@@ -339,8 +415,11 @@ export default function ReservationFormSection() {
                   const val = e.target.value;
                   setChildren7_11(val === "" ? "" : parseInt(val));
                 }}
-                disabled // Input deshabilitado
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
+                onBlur={() => {
+                  if (children_7_11 === "" || Number(children_7_11) < 0)
+                    setChildren7_11(0);
+                }}
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
               />
             </div>
           </div>
@@ -388,71 +467,175 @@ export default function ReservationFormSection() {
                 </div>
               </div>
 
-              {/* --- Sección Reveillon (AHORA TAMBIÉN CERRADA) --- */}
-              <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden opacity-60 grayscale-[0.5] cursor-not-allowed select-none">
-                {/* Badge de Esgotado */}
-                <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  Vagas Esgotadas
+              {/* --- Sección Reveillon (PARCIALMENTE ABIERTA) --- */}
+              <div className="bg-[#faf7f0] border border-amber-200/40 rounded-lg p-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  Últimas Vagas 01/01
                 </div>
 
                 <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
                   Celebração Dourada
                 </h4>
-                <p className="text-center text-xs text-gray-600 font-semibold mb-4">
-                  *Reservas Encerradas
+                <p className="text-center text-xs text-red-600 font-semibold mb-4">
+                  *Vagas disponíveis apenas para 01/01
                 </p>
 
-                <div className="space-y-4 pointer-events-none">
-                  {reveillonOptions.map((option) => (
-                    <div key={option.id} className="flex items-start space-x-2">
-                      {/* Checkbox Desactivado */}
-                      <input
-                        type="checkbox"
-                        id={option.id}
-                        disabled={true}
-                        className="mt-1"
-                      />
-                      <label
-                        htmlFor={option.id}
-                        className="flex-1 font-radley text-[#0a3a2a]"
+                <div className="space-y-4">
+                  {reveillonOptions.map((option) => {
+                    // LÓGICA DE HABILITADO/DESHABILITADO
+                    // Solo habilitamos ID 'reveillon-4' y 'reveillon-5'
+                    const isEnabled =
+                      option.id === "reveillon-4" ||
+                      option.id === "reveillon-5";
+
+                    const discountPercentage = Math.round(
+                      ((option.originalPrice - option.price) /
+                        option.originalPrice) *
+                        100
+                    );
+                    const hasDiscount = isEnabled && discountPercentage > 0;
+
+                    return (
+                      <div
+                        key={option.id}
+                        className={`flex items-start space-x-2 ${!isEnabled ? "opacity-50 grayscale select-none" : ""}`}
                       >
-                        <div className="flex justify-between items-start">
-                          <span>{option.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm text-[#0a3a2a]/70">
-                            R$ {option.price.toFixed(2)}
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-                  ))}
+                        <input
+                          type="checkbox"
+                          id={option.id}
+                          checked={selectedMeals.includes(option.id)}
+                          onChange={(e) =>
+                            handleMealSelection(option.id, e.target.checked)
+                          }
+                          disabled={!isEnabled}
+                          className="mt-1"
+                        />
+                        <label
+                          htmlFor={option.id}
+                          className={`flex-1 font-radley ${isEnabled ? "text-[#0a3a2a] cursor-pointer" : "text-gray-500 cursor-not-allowed"}`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <span>{option.name}</span>
+                            {hasDiscount && (
+                              <span className="bg-red-100 text-red-700 text-sm px-2 py-0.5 rounded ml-2 font-bold whitespace-nowrap border border-red-200">
+                                -{discountPercentage}%
+                              </span>
+                            )}
+                            {!isEnabled && (
+                              <span className="text-xs font-bold text-gray-500 ml-2">
+                                (Esgotado)
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            {hasDiscount && (
+                              <span className="text-sm text-gray-400 line-through">
+                                R$ {option.originalPrice.toFixed(2)}
+                              </span>
+                            )}
+                            <span
+                              className={`font-bold ${
+                                hasDiscount
+                                  ? "text-md text-red-600"
+                                  : "text-sm text-[#0a3a2a]/70"
+                              }`}
+                            >
+                              R$ {option.price.toFixed(2)}
+                            </span>
+                          </div>
+                        </label>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
+            {error && (
+              <p className="text-center text-red-600 font-semibold">{error}</p>
+            )}
+            <div className="text-center">
+              {totalSavings > 0 && (
+                <p className="text-sm text-red-600 font-medium mb-1">
+                  Você está economizando: R$ {totalSavings.toFixed(2)} nesta
+                  reserva!
+                </p>
+              )}
+              <p className="font-radley text-lg text-[#0a3a2a]">
+                <span className="font-semibold">Valor Total Estimado:</span>{" "}
+                <span className="font-greatvibes text-2xl">
+                  R$ {totalPrice.toFixed(2)}
+                </span>
+              </p>
+            </div>
             <div className="text-center pt-4">
-              {/* BOTÓN DESHABILITADO */}
               <Button
-                type="button"
+                type="submit"
                 variant="ghost"
-                disabled={true}
-                className="w-full md:w-auto bg-[#0a3a2a]/10 border-[1px] border-[#0a3a2a]/30 text-[#0a3a2a]/50 italic font-light cursor-not-allowed"
+                disabled={isSubmitting}
+                className="w-full md:w-auto md:bg-transparent border-[1px] border-[#0a3a2a] text-[#0a3a2a] hover:text-amber-200 hover:bg-[#0a3a2a] italic font-light cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Reservas Encerradas
+                {isSubmitting ? "Enviando Reserva..." : "Finalizar Pré-Reserva"}
               </Button>
             </div>
           </div>
         </form>
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          {/* El modal se mantiene por si acaso, pero no se abrirá */}
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reserva</DialogTitle>
+          <DialogContent className="bg-gradient-to-b from-[#faf7f0] to-white p-8 rounded-xl border-2 border-amber-100 shadow-lg max-w-md mx-auto">
+            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
+              <div className="bg-[#0a3a2a] p-3 rounded-full border-4 border-amber-100">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-amber-200"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <DialogHeader className="pt-4">
+              <DialogTitle className="font-greatvibes text-4xl text-[#0a3a2a] text-center mt-2">
+                Parabéns!
+              </DialogTitle>
+              <DialogDescription className="font-radley text-lg text-[#0a3a2a]/80 text-center mt-4 space-y-2">
+                <span>Sua pré-reserva foi realizada com sucesso. </span>
+                <span>
+                  Em breve, nossa equipe comercial entrará em contato para
+                  finalizar os detalhes e o pagamento com os valores
+                  promocionais garantidos.
+                </span>
+              </DialogDescription>
             </DialogHeader>
+
+            <div className="flex justify-center gap-2 my-4">
+              <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-amber-200 to-transparent"></div>
+              <div className="text-amber-300">✦</div>
+              <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-amber-200 to-transparent"></div>
+            </div>
+
+            <DialogFooter className="flex justify-center pt-2">
+              <Button
+                variant="ghost"
+                className="bg-transparent cursor-pointer border-[1px] border-[#0a3a2a] text-[#0a3a2a] hover:text-amber-200 hover:bg-[#0a3a2a] italic font-light px-8"
+                onClick={() => {
+                  setModalOpen(false);
+                  resetForm();
+                }}
+              >
+                Fechar
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
