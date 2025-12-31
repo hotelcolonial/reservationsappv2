@@ -23,7 +23,7 @@ interface MealOption {
   slug: string;
 }
 
-// 2. DATOS DE NAVIDAD (Precios originales, pero se deshabilitarán)
+// 2. DATOS DE NAVIDAD (CERRADO)
 const natalOptions: MealOption[] = [
   {
     id: "natal-1",
@@ -62,40 +62,40 @@ const natalOptions: MealOption[] = [
   },
 ];
 
-// 3. DATOS DE REVEILLON (Precios Actualizados: Todo a 90 excepto la Cena a 280)
+// 3. DATOS DE REVEILLON (AHORA CERRADO TAMBIÉN)
 const reveillonOptions: MealOption[] = [
   {
     id: "reveillon-1",
     name: "Jantar de Boas-Vindas Italiano (30/12)",
-    price: 90, // PRECIO FIJO 90
+    price: 90,
     originalPrice: 180,
     slug: "jantar-30",
   },
   {
     id: "reveillon-2",
     name: "Almoço de Véspera (31/12)",
-    price: 90, // PRECIO FIJO 90
+    price: 90,
     originalPrice: 90,
     slug: "almoco-vespera-reveillon",
   },
   {
     id: "reveillon-3",
     name: "Jantar de Réveillon (31/12)",
-    price: 280, // PRECIO REBAJADO A 280
+    price: 280,
     originalPrice: 380,
     slug: "jantar-vespera-reveillon",
   },
   {
     id: "reveillon-4",
     name: "Almoço de Ano Novo (01/01)",
-    price: 90, // PRECIO FIJO 90
+    price: 90,
     originalPrice: 210,
     slug: "almoco-ano-novo",
   },
   {
     id: "reveillon-5",
     name: "Jantar de Ano Novo (01/01)",
-    price: 90, // PRECIO FIJO 90
+    price: 90,
     originalPrice: 210,
     slug: "jantar-ano-novo",
   },
@@ -169,78 +169,8 @@ export default function ReservationFormSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
-    if (selectedMeals.length === 0) {
-      setError("Por favor, selecione pelo menos uma refeição.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    const finalAdults = Number(adults) || 1;
-    const finalChildren0_6 = Number(children_0_6) || 0;
-    const finalChildren7_11 = Number(children_7_11) || 0;
-
-    const selectedMealDetails = allMealOptions.filter((opt) =>
-      selectedMeals.includes(opt.id)
-    );
-
-    try {
-      await createReservationsForEvents(
-        {
-          name,
-          email,
-          adults: finalAdults,
-          children_0_6: finalChildren0_6,
-          children_7_11: finalChildren7_11,
-          locator: null,
-          is_verified: false,
-        },
-        selectedMealDetails
-      );
-
-      const eventsForEmail = selectedMealDetails.map((mealDetail) => {
-        const eventPrice =
-          mealDetail.price * finalAdults +
-          mealDetail.price * finalChildren7_11 * 0.6;
-        return {
-          id: "Confirmado",
-          name: mealDetail.name,
-          date: mealDetail.id.includes("natal")
-            ? "Dezembro de 2025"
-            : "Final de Dezembro / Início de 2026",
-          price: eventPrice,
-        };
-      });
-
-      const emailPayload = {
-        fullName: name,
-        email: email,
-        adults: finalAdults,
-        children0to6: finalChildren0_6,
-        children7to11: finalChildren7_11,
-        bookedEvents: eventsForEmail,
-        grandTotal: totalPrice,
-        reservationDate: new Date().toLocaleDateString("pt-BR"),
-      };
-
-      try {
-        await fetch("/api/emails", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(emailPayload),
-        });
-      } catch (emailError) {
-        console.warn("Error enviando email:", emailError);
-      }
-
-      setModalOpen(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao processar");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Bloqueo adicional por seguridad
+    return;
   };
 
   return (
@@ -262,15 +192,14 @@ export default function ReservationFormSection() {
             Colonial Iguaçu.
           </p>
 
-          {/* --- BOTÓN LLAMATIVO DEL MENÚ --- */}
-          <div className="mt-8 flex justify-center">
+          {/* --- BOTÓN MENÚ (AÚN VISIBLE PARA CONSULTA) --- */}
+          <div className="mt-8 flex flex-col items-center gap-4">
             <a
-              href="https://online.fliphtml5.com/tollw/xttx/"
+              href="https://online.fliphtml5.com/tollw/Pacotes-Reveillon/"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex items-center gap-3 px-8 py-3 bg-[#0a3a2a] text-amber-200 rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-amber-200/30"
             >
-              {/* Icono Menu */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -288,10 +217,9 @@ export default function ReservationFormSection() {
               </svg>
 
               <span className="font-radley text-lg font-medium tracking-wide">
-                Confira o Menu e a Programação
+                ✨ Confira os Pacotes de Réveillon 2026
               </span>
 
-              {/* Flecha animada */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -308,6 +236,10 @@ export default function ReservationFormSection() {
                 <path d="m12 5 7 7-7 7"></path>
               </svg>
             </a>
+
+            <p className="font-greatvibes text-3xl text-[#0a3a2a] animate-pulse mt-2">
+              Nos vemos em 2026! 🥂
+            </p>
           </div>
         </div>
 
@@ -324,8 +256,8 @@ export default function ReservationFormSection() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                required
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
+                disabled // Input deshabilitado
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
               />
             </div>
 
@@ -341,8 +273,8 @@ export default function ReservationFormSection() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
+                disabled // Input deshabilitado
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
               />
             </div>
 
@@ -363,11 +295,8 @@ export default function ReservationFormSection() {
                   const val = e.target.value;
                   setAdults(val === "" ? "" : parseInt(val));
                 }}
-                onBlur={() => {
-                  if (adults === "" || Number(adults) < 1) setAdults(1);
-                }}
-                required
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
+                disabled // Input deshabilitado
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
               />
             </div>
 
@@ -388,11 +317,8 @@ export default function ReservationFormSection() {
                   const val = e.target.value;
                   setChildren0_6(val === "" ? "" : parseInt(val));
                 }}
-                onBlur={() => {
-                  if (children_0_6 === "" || Number(children_0_6) < 0)
-                    setChildren0_6(0);
-                }}
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
+                disabled // Input deshabilitado
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
               />
             </div>
 
@@ -413,11 +339,8 @@ export default function ReservationFormSection() {
                   const val = e.target.value;
                   setChildren7_11(val === "" ? "" : parseInt(val));
                 }}
-                onBlur={() => {
-                  if (children_7_11 === "" || Number(children_7_11) < 0)
-                    setChildren7_11(0);
-                }}
-                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a]"
+                disabled // Input deshabilitado
+                className="border-[#0a3a2a]/20 focus:border-[#0a3a2a] focus:ring-[#0a3a2a] opacity-70"
               />
             </div>
           </div>
@@ -429,208 +352,107 @@ export default function ReservationFormSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* --- Sección de Navidad (CERRADA) --- */}
               <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden opacity-60 grayscale-[0.5] cursor-not-allowed select-none">
-                {/* Badge de Encerrado */}
                 <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
                   Vendas Encerradas
                 </div>
-
                 <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
                   Festividades Natalinas
                 </h4>
                 <p className="text-center text-xs text-gray-600 font-semibold mb-4">
                   *Evento finalizado
                 </p>
-
                 <div className="space-y-4 pointer-events-none">
-                  {natalOptions.map((option) => {
-                    return (
-                      <div
-                        key={option.id}
-                        className="flex items-start space-x-2"
+                  {natalOptions.map((option) => (
+                    <div key={option.id} className="flex items-start space-x-2">
+                      <input
+                        type="checkbox"
+                        id={option.id}
+                        disabled={true}
+                        className="mt-1"
+                      />
+                      <label
+                        htmlFor={option.id}
+                        className="flex-1 font-radley text-[#0a3a2a]"
                       >
-                        <input
-                          type="checkbox"
-                          id={option.id}
-                          disabled={true}
-                          className="mt-1"
-                        />
-                        <label
-                          htmlFor={option.id}
-                          className="flex-1 font-radley text-[#0a3a2a]"
-                        >
-                          <div className="flex justify-between items-start">
-                            <span>{option.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm text-[#0a3a2a]/70">
-                              R$ {option.price.toFixed(2)}
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-                    );
-                  })}
+                        <div className="flex justify-between items-start">
+                          <span>{option.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-[#0a3a2a]/70">
+                            R$ {option.price.toFixed(2)}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* --- Sección Reveillon (ACTIVA CON DESCUENTOS NUEVOS) --- */}
-              <div className="bg-[#faf7f0] border border-amber-200/40 rounded-lg p-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                  Oferta Especial
+              {/* --- Sección Reveillon (AHORA TAMBIÉN CERRADA) --- */}
+              <div className="bg-[#faf7f0] border border-[#0a3a2a]/10 rounded-lg p-6 relative overflow-hidden opacity-60 grayscale-[0.5] cursor-not-allowed select-none">
+                {/* Badge de Esgotado */}
+                <div className="absolute top-0 right-0 bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                  Vagas Esgotadas
                 </div>
 
                 <h4 className="font-greatvibes text-2xl text-[#0a3a2a] mb-1 text-center">
                   Celebração Dourada
                 </h4>
-                <p className="text-center text-xs text-red-600 font-semibold mb-4">
-                  *Últimas vagas promocionais
+                <p className="text-center text-xs text-gray-600 font-semibold mb-4">
+                  *Reservas Encerradas
                 </p>
 
-                <div className="space-y-4">
-                  {reveillonOptions.map((option) => {
-                    // Cálculo automático del porcentaje basado en los nuevos precios (90 o 280)
-                    const discountPercentage = Math.round(
-                      ((option.originalPrice - option.price) /
-                        option.originalPrice) *
-                        100
-                    );
-                    const hasDiscount = discountPercentage > 0;
-
-                    return (
-                      <div
-                        key={option.id}
-                        className="flex items-start space-x-2"
+                <div className="space-y-4 pointer-events-none">
+                  {reveillonOptions.map((option) => (
+                    <div key={option.id} className="flex items-start space-x-2">
+                      {/* Checkbox Desactivado */}
+                      <input
+                        type="checkbox"
+                        id={option.id}
+                        disabled={true}
+                        className="mt-1"
+                      />
+                      <label
+                        htmlFor={option.id}
+                        className="flex-1 font-radley text-[#0a3a2a]"
                       >
-                        <input
-                          type="checkbox"
-                          id={option.id}
-                          checked={selectedMeals.includes(option.id)}
-                          onChange={(e) =>
-                            handleMealSelection(option.id, e.target.checked)
-                          }
-                          className="mt-1"
-                        />
-                        <label
-                          htmlFor={option.id}
-                          className="flex-1 font-radley text-[#0a3a2a]"
-                        >
-                          <div className="flex justify-between items-start">
-                            <span>{option.name}</span>
-                            {hasDiscount && (
-                              <span className="bg-red-100 text-red-700 text-sm px-2 py-0.5 rounded ml-2 font-bold whitespace-nowrap border border-red-200">
-                                -{discountPercentage}%
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            {hasDiscount && (
-                              <span className="text-sm text-gray-400 line-through">
-                                R$ {option.originalPrice.toFixed(2)}
-                              </span>
-                            )}
-                            <span
-                              className={`font-bold ${
-                                hasDiscount
-                                  ? "text-md text-red-600"
-                                  : "text-sm text-[#0a3a2a]/70"
-                              }`}
-                            >
-                              R$ {option.price.toFixed(2)}
-                            </span>
-                          </div>
-                        </label>
-                      </div>
-                    );
-                  })}
+                        <div className="flex justify-between items-start">
+                          <span>{option.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-[#0a3a2a]/70">
+                            R$ {option.price.toFixed(2)}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
-            {error && (
-              <p className="text-center text-red-600 font-semibold">{error}</p>
-            )}
-            <div className="text-center">
-              {totalSavings > 0 && (
-                <p className="text-sm text-red-600 font-medium mb-1">
-                  Você está economizando: R$ {totalSavings.toFixed(2)} nesta
-                  reserva!
-                </p>
-              )}
-              <p className="font-radley text-lg text-[#0a3a2a]">
-                <span className="font-semibold">Valor Total Estimado:</span>{" "}
-                <span className="font-greatvibes text-2xl">
-                  R$ {totalPrice.toFixed(2)}
-                </span>
-              </p>
-            </div>
             <div className="text-center pt-4">
+              {/* BOTÓN DESHABILITADO */}
               <Button
-                type="submit"
+                type="button"
                 variant="ghost"
-                disabled={isSubmitting}
-                className="w-full md:w-auto md:bg-transparent border-[1px] border-[#0a3a2a] text-[#0a3a2a] hover:text-amber-200 hover:bg-[#0a3a2a] italic font-light cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={true}
+                className="w-full md:w-auto bg-[#0a3a2a]/10 border-[1px] border-[#0a3a2a]/30 text-[#0a3a2a]/50 italic font-light cursor-not-allowed"
               >
-                {isSubmitting ? "Enviando Reserva..." : "Finalizar Pré-Reserva"}
+                Reservas Encerradas
               </Button>
             </div>
           </div>
         </form>
 
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogContent className="bg-gradient-to-b from-[#faf7f0] to-white p-8 rounded-xl border-2 border-amber-100 shadow-lg max-w-md mx-auto">
-            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
-              <div className="bg-[#0a3a2a] p-3 rounded-full border-4 border-amber-100">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-amber-200"
-                >
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </div>
-            </div>
-
-            <DialogHeader className="pt-4">
-              <DialogTitle className="font-greatvibes text-4xl text-[#0a3a2a] text-center mt-2">
-                Parabéns!
-              </DialogTitle>
-              <DialogDescription className="font-radley text-lg text-[#0a3a2a]/80 text-center mt-4 space-y-2">
-                <span>Sua pré-reserva foi realizada com sucesso. </span>
-                <span>
-                  Em breve, nossa equipe comercial entrará em contato para
-                  finalizar os detalhes e o pagamento com os valores
-                  promocionais garantidos.
-                </span>
-              </DialogDescription>
+          {/* El modal se mantiene por si acaso, pero no se abrirá */}
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reserva</DialogTitle>
             </DialogHeader>
-
-            <div className="flex justify-center gap-2 my-4">
-              <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-amber-200 to-transparent"></div>
-              <div className="text-amber-300">✦</div>
-              <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-amber-200 to-transparent"></div>
-            </div>
-
-            <DialogFooter className="flex justify-center pt-2">
-              <Button
-                variant="ghost"
-                className="bg-transparent cursor-pointer border-[1px] border-[#0a3a2a] text-[#0a3a2a] hover:text-amber-200 hover:bg-[#0a3a2a] italic font-light px-8"
-                onClick={() => {
-                  setModalOpen(false);
-                  resetForm();
-                }}
-              >
-                Fechar
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
